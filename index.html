@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥐 Bakery Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <div class="header-logo">🥐</div>
+    <div>
+      <div class="header-title">Bakery Management</div>
+      <div class="header-subtitle">Order & Inventory System</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill">
+      <div class="stat-number" id="stat-total">0</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-number" id="stat-revenue">₹0</div>
+      <div class="stat-label">Revenue</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-number" id="stat-today">0</div>
+      <div class="stat-label">Today</div>
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section-title">Menu</div>
+    <button class="nav-btn active" onclick="showSection('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </button>
+    <button class="nav-btn" onclick="showSection('add-order')">
+      <span class="nav-icon">➕</span> Add Order
+    </button>
+    <button class="nav-btn" onclick="showSection('orders')">
+      <span class="nav-icon">📋</span> View Orders
+    </button>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Tools</div>
+    <button class="nav-btn" onclick="showSection('export')">
+      <span class="nav-icon">💾</span> Export Data
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- DASHBOARD -->
+    <section class="page-section active" id="section-dashboard">
+      <div class="section-header">
+        <div class="section-title">Good Morning! 🌅</div>
+        <div class="section-desc">Here's a snapshot of your bakery today.</div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">🧾</div>
+          <div class="kpi-value" id="kpi-orders">0</div>
+          <div class="kpi-label">Total Orders</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-value" id="kpi-revenue">₹0</div>
+          <div class="kpi-label">Total Revenue</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📦</div>
+          <div class="kpi-value" id="kpi-items">0</div>
+          <div class="kpi-label">Items Sold</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🕐 Recent Orders</div>
+        <div id="recent-orders-list"></div>
+      </div>
+    </section>
+
+    <!-- ADD ORDER -->
+    <section class="page-section" id="section-add-order">
+      <div class="section-header">
+        <div class="section-title">Add New Order</div>
+        <div class="section-desc">Fill in the details to record a new customer order.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 Order Details</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" id="add-name" placeholder="e.g. Riya Sharma">
+          </div>
+          <div class="form-group">
+            <label>Item</label>
+            <input type="text" id="add-item" placeholder="e.g. Croissant, Bread, Cake">
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="add-qty" placeholder="e.g. 3" min="1">
+          </div>
+          <div class="form-group">
+            <label>Price per Unit (₹)</label>
+            <input type="number" id="add-price" placeholder="e.g. 80" min="0">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addOrder()">✅ Place Order</button>
+          <button class="btn btn-secondary" onclick="clearAddForm()">✖ Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW ORDERS -->
+    <section class="page-section" id="section-orders">
+      <div class="section-header">
+        <div class="section-title">All Orders</div>
+        <div class="section-desc">Browse, search, and manage all customer orders.</div>
+      </div>
+      <div class="table-toolbar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search by name or item…" oninput="renderTable(this.value)">
+        </div>
+        <button class="btn btn-primary" onclick="showSection('add-order')">➕ New Order</button>
+      </div>
+      <div class="card" style="padding:0;">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPORT -->
+    <section class="page-section" id="section-export">
+      <div class="section-header">
+        <div class="section-title">Export Data</div>
+        <div class="section-desc">Download your order records in your preferred format.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⬇️ Choose Export Format</div>
+        <div class="export-options">
+          <div class="export-card" onclick="exportCSV()">
+            <div class="exp-icon">📊</div>
+            <div class="exp-label">Export as CSV</div>
+            <div class="exp-desc">Opens in Excel & Google Sheets</div>
+          </div>
+          <div class="export-card" onclick="exportJSON()">
+            <div class="exp-icon">🗂️</div>
+            <div class="exp-label">Export as JSON</div>
+            <div class="exp-desc">For developers & APIs</div>
+          </div>
+          <div class="export-card" onclick="printOrders()">
+            <div class="exp-icon">🖨️</div>
+            <div class="exp-label">Print / Save PDF</div>
+            <div class="exp-desc">Print or save as PDF from browser</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Order</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Customer Name</label>
+        <input type="text" id="edit-name">
+      </div>
+      <div class="form-group">
+        <label>Item</label>
+        <input type="text" id="edit-item">
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="edit-qty" min="1">
+      </div>
+      <div class="form-group">
+        <label>Price per Unit (₹)</label>
+        <input type="number" id="edit-price" min="0">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="saveEdit()">💾 Save Changes</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ────────────── STATE ──────────────
+let orders = JSON.parse(localStorage.getItem('bakery_orders') || '[]');
+let editIndex = null;
+
+function saveOrders() {
+  localStorage.setItem('bakery_orders', JSON.stringify(orders));
+}
+
+// ────────────── NAVIGATION ──────────────
+function showSection(id) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+  document.getElementById('section-' + id).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  btns.forEach(b => {
+    if (b.getAttribute('onclick').includes(id)) b.classList.add('active');
+  });
+
+  if (id === 'dashboard') updateDashboard();
+  if (id === 'orders') renderTable();
+}
+
+// ────────────── TOAST ──────────────
+function showToast(msg, type = 'success') {
+  const tc = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  toast.innerHTML = (type === 'success' ? '✅' : '⚠️') + ' ' + msg;
+  tc.appendChild(toast);
+  setTimeout(() => toast.remove(), 3100);
+}
+
+// ────────────── ADD ORDER ──────────────
+function addOrder() {
+  const name = document.getElementById('add-name').value.trim();
+  const item = document.getElementById('add-item').value.trim();
+  const qty = parseInt(document.getElementById('add-qty').value);
+  const price = parseFloat(document.getElementById('add-price').value);
+
+  if (!name || !item || isNaN(qty) || qty < 1 || isNaN(price) || price < 0) {
+    showToast('Please fill all fields correctly.', 'error');
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  orders.push({ name, item, qty, price, date: today });
+  saveOrders();
+  clearAddForm();
+  updateHeaderStats();
+  showToast(`Order for ${name} added successfully!`);
+  showSection('orders');
+}
+
+function clearAddForm() {
+  ['add-name', 'add-item', 'add-qty', 'add-price'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+// ────────────── TABLE RENDER ──────────────
+function renderTable(query = '') {
+  const tbody = document.getElementById('orders-tbody');
+  const q = query.toLowerCase();
+  const filtered = orders.filter((o, i) => {
+    return o.name.toLowerCase().includes(q) || o.item.toLowerCase().includes(q);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr><td colspan="8">
+        <div class="empty-state">
+          <div class="empty-icon">🍞</div>
+          <p>No orders found.</p>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((o, fi) => {
+    const realIndex = orders.indexOf(o);
+    const total = o.qty * o.price;
+    return `<tr>
+      <td><span class="order-id-badge">#${String(realIndex + 1).padStart(3,'0')}</span></td>
+      <td>${esc(o.name)}</td>
+      <td>${esc(o.item)}</td>
+      <td>${o.qty}</td>
+      <td class="price-cell">₹${o.price.toFixed(2)}</td>
+      <td class="price-cell">₹${total.toFixed(2)}</td>
+      <td>${o.date}</td>
+      <td><div class="actions-cell">
+        <button class="btn btn-edit" onclick="openEdit(${realIndex})">✏️ Edit</button>
+        <button class="btn btn-danger" onclick="deleteOrder(${realIndex})">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ────────────── DELETE ──────────────
+function deleteOrder(idx) {
+  if (!confirm(`Delete order #${idx+1} for "${orders[idx].name}"?`)) return;
+  orders.splice(idx, 1);
+  saveOrders();
+  renderTable();
+  updateHeaderStats();
+  updateDashboard();
+  showToast('Order deleted.');
+}
+
+// ────────────── EDIT ──────────────
+function openEdit(idx) {
+  editIndex = idx;
+  const o = orders[idx];
+  document.getElementById('edit-name').value = o.name;
+  document.getElementById('edit-item').value = o.item;
+  document.getElementById('edit-qty').value = o.qty;
+  document.getElementById('edit-price').value = o.price;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editIndex = null;
+}
+
+function saveEdit() {
+  const name = document.getElementById('edit-name').value.trim();
+  const item = document.getElementById('edit-item').value.trim();
+  const qty = parseInt(document.getElementById('edit-qty').value);
+  const price = parseFloat(document.getElementById('edit-price').value);
+
+  if (!name || !item || isNaN(qty) || qty < 1 || isNaN(price) || price < 0) {
+    showToast('Please fill all fields correctly.', 'error');
+    return;
+  }
+
+  orders[editIndex] = { ...orders[editIndex], name, item, qty, price };
+  saveOrders();
+  closeModal();
+  renderTable();
+  updateHeaderStats();
+  showToast('Order updated successfully!');
+}
+
+// ────────────── DASHBOARD ──────────────
+function updateDashboard() {
+  const total = orders.length;
+  const revenue = orders.reduce((s, o) => s + o.qty * o.price, 0);
+  const items = orders.reduce((s, o) => s + o.qty, 0);
+
+  document.getElementById('kpi-orders').textContent = total;
+  document.getElementById('kpi-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+  document.getElementById('kpi-items').textContent = items;
+
+  // Recent orders
+  const recent = [...orders].reverse().slice(0, 5);
+  const el = document.getElementById('recent-orders-list');
+  if (recent.length === 0) {
+    el.innerHTML = `<div class="empty-state" style="padding:2rem 0;"><div class="empty-icon">🥐</div><p>No orders yet. Start adding some!</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="table-wrapper"><table>
+    <thead><tr><th>Customer</th><th>Item</th><th>Qty</th><th>Total</th><th>Date</th></tr></thead>
+    <tbody>
+    ${recent.map(o => `<tr>
+      <td>${esc(o.name)}</td>
+      <td>${esc(o.item)}</td>
+      <td>${o.qty}</td>
+      <td class="price-cell">₹${(o.qty*o.price).toFixed(2)}</td>
+      <td>${o.date}</td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function updateHeaderStats() {
+  const total = orders.length;
+  const revenue = orders.reduce((s, o) => s + o.qty * o.price, 0);
+  const today = new Date().toISOString().split('T')[0];
+  const todayCount = orders.filter(o => o.date === today).length;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+  document.getElementById('stat-today').textContent = todayCount;
+}
+
+// ────────────── EXPORT ──────────────
+function exportCSV() {
+  if (orders.length === 0) { showToast('No orders to export.', 'error'); return; }
+  const header = ['ID', 'Customer Name', 'Item', 'Quantity', 'Unit Price', 'Total', 'Order Date'];
+  const rows = orders.map((o, i) => [i+1, o.name, o.item, o.qty, o.price, (o.qty*o.price).toFixed(2), o.date]);
+  const csv = [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  downloadFile('bakery_orders.csv', csv, 'text/csv');
+  showToast('CSV downloaded!');
+}
+
+function exportJSON() {
+  if (orders.length === 0) { showToast('No orders to export.', 'error'); return; }
+  downloadFile('bakery_orders.json', JSON.stringify(orders, null, 2), 'application/json');
+  showToast('JSON downloaded!');
+}
+
+function downloadFile(name, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name;
+  a.click();
+}
+
+function printOrders() {
+  if (orders.length === 0) { showToast('No orders to print.', 'error'); return; }
+  window.print();
+}
+
+// ────────────── CLOSE MODAL ON OVERLAY CLICK ──────────────
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ────────────── INIT ──────────────
+updateHeaderStats();
+updateDashboard();
+</script>
+</body>
+</html>
