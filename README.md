@@ -1,5 +1,5 @@
-# 🍰Bakery Management System 
-Bakery Management System is a project with python(backend), html(frontend), and css(styling). It uses http.server module for frontend in python 
+# 🍰Baker
+Baker is a project with python(backend), html(frontend), and css(styling). It uses http.server module for frontend in python 
 
 ###
 <h4>•🗂️File Structure</h4>
